@@ -8,6 +8,7 @@ object Dependencies {
   val http4sVersion = "0.23.12"
   val kafkaVersion = "2.8.0"
   val circeVersion = "0.14.1"
+  val kafkaSerializationV = "0.5.22"
 
   val Http: Seq[ModuleID] = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % TapirVersion,

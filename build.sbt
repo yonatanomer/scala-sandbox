@@ -1,7 +1,10 @@
 scalaVersion := "2.13.5"
+
 ThisBuild / organization := "com.innerproduct"
 ThisBuild / version := "0.0.1-SNAPSHOT"
 ThisBuild / fork := true
+
+///mainClass in (Compile, run) := Some("com.yon.kafka_test.ProducerApp")
 
 val commonSettings = Seq(
   // remove fatal warnings since it is handy to have unused and dead code blocks

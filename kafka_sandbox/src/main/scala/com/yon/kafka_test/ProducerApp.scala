@@ -15,15 +15,14 @@ import scala.collection.immutable.Seq
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
+import CarTrafficDummyData._
+import com.yon.kafka_test.Serialization.{CirceJsonSerializer, deserializer, serializer}
+import io.circe.generic.auto._
 
-class ProducerApp extends IOApp {
-
-  type key = Int
-  type value = String
-
+object ProducerApp extends IOApp {
   private val props: Map[String, Object] = Map(
-    CLIENT_ID_CONFIG -> "text-filter-producer",
-    BOOTSTRAP_SERVERS_CONFIG -> "kafka:9092",
+    CLIENT_ID_CONFIG -> "json-topics",
+    BOOTSTRAP_SERVERS_CONFIG -> "localhost:9092",
     StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG -> Serdes.stringSerde.getClass
     // in case if needed custom serializer, e.g for protobuf
     //KEY_SERIALIZER_CLASS_CONFIG -> classOf[KafkaAvroSerializer],
@@ -33,15 +32,15 @@ class ProducerApp extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     Resource
-      .make(IO(new KafkaProducer[key, value](props.asJava)))(p => {
+      .make(IO(new KafkaProducer[CarId, CarSpeed](props.asJava, serializer[CarId], serializer[CarSpeed])))(p => {
         IO(p.close())
       })
-      .use(produce)
+      .use(produce("car-speed", carSpeed))
       .as(ExitCode.Success)
   }
 
-  def produce(producer: KafkaProducer[key, value]): IO[Either[Exception, Unit]] = {
-    IO(Left(new RuntimeException("not implemented yet")))
+  def produce[K, V](topic: String, records: Seq[(K, V)])(producer: KafkaProducer[K, V]): IO[Nothing] = {
+    IO(send(producer)(topic, records)).foreverM
   }
 
   private def send[K, V](
@@ -52,11 +51,14 @@ class ProducerApp extends IOApp {
       producer.send(
         new ProducerRecord[K, V](topic, k, v),
         new Callback {
-          override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit =
+          override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
+            println("produced a record")
             Option(exception).map(p.failure).getOrElse(p.success(()))
+          }
         }
       )
       IO.fromFuture(IO(p.future)) *> IO(println(s"produced data to [$topic]")) *> IO.sleep(2.seconds)
     }
   }
+
 }
