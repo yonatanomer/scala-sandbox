@@ -2,53 +2,35 @@ package com.yon.kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.kafka_test.CarTrafficDummyData._
-import com.yon.kafka_test.Serialization.{CirceJsonDeserializer, CirceJsonSerializer, deserializer, serializer}
+import com.yon.kafka_test.KafkaClientConfig.kafkaProps
+import com.yon.kafka_test.Serialization.deserializer
 import io.circe.generic.auto._
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
-import org.apache.kafka.clients.producer.ProducerConfig.{BOOTSTRAP_SERVERS_CONFIG, CLIENT_ID_CONFIG}
-import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
-import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.scala.serialization.Serdes
 
 import java.time.Duration
-import java.util
 import scala.collection.immutable.Seq
-import scala.concurrent.Promise
-import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 
 object ConsumerApp extends IOApp {
-
-  private val props: Map[String, Object] = Map(
-    CLIENT_ID_CONFIG -> "json-topics-consumer",
-    "group.id" -> "json-topics-consumer",
-    BOOTSTRAP_SERVERS_CONFIG -> "localhost:9092",
-    StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG -> Serdes.stringSerde.getClass
-    // in case if needed custom serializer, e.g for protobuf
-    //KEY_SERIALIZER_CLASS_CONFIG -> classOf[KafkaAvroSerializer],
-    //VALUE_SERIALIZER_CLASS_CONFIG -> classOf[KafkaAvroSerializer],
-    //SCHEMA_REGISTRY_URL_CONFIG -> "http://schema-registry:8081"
-  )
 
   override def run(args: List[String]): IO[ExitCode] = {
 
     Resource
       .make(IO {
-        val consumer = new KafkaConsumer[CarId, CarSpeed](props.asJava, deserializer[CarId], deserializer[CarSpeed])
+        val consumer = new KafkaConsumer[CarId, CarSpeed](
+          kafkaProps(Some("json-topics-consumer"), "json-topics-consumer", "localhost:9092").asJava,
+          deserializer[CarId],
+          deserializer[CarSpeed]
+        )
 
-        readFromOffset(0L, 10, consumer)
-
-        //consumer.subscribe(Seq("car-speed").asJava)
-
-        val r = consumer.poll(Duration.ofSeconds(5)).asScala
+        consumer.subscribe(Seq("car-speed").asJava)
         consumer
       })(c => IO(c.close()))
       .use { consumer =>
         val consume: IO[Unit] = for {
 
           records <- IO(consumer.poll(Duration.ofSeconds(5)).asScala.toSeq)
-          recs = {
+          recs <- IO {
             println("consumed records:")
             records.map { r =>
               {
@@ -65,29 +47,7 @@ object ConsumerApp extends IOApp {
       .as(ExitCode.Success)
   }
 
-  def readFromOffset(fromOffset: Long, messageCount: Long, consumer: KafkaConsumer[CarId, CarSpeed]) = {
-    import org.apache.kafka.clients.consumer.ConsumerRecord
-    import org.apache.kafka.clients.consumer.ConsumerRecords
-
-    val partitionToReadFrom = new TopicPartition("car-speed", 0)
-    consumer.assign(util.Arrays.asList(partitionToReadFrom));
-
-    consumer.seek(partitionToReadFrom, fromOffset)
-
-    import java.time.Duration
-    var count = messageCount
-    while (count > 0) {
-      val records = consumer.poll(Duration.ofMillis(100))
-      import scala.collection.JavaConversions._
-      for (record <- records) {
-        println("record: " + record)
-        count = count - 1
-      }
-    }
-  }
-
   def printRecords(records: Seq[ConsumerRecord[CarId, CarSpeed]]) = {
-
     println("consumed records:")
     records.map { r =>
       {
@@ -95,27 +55,4 @@ object ConsumerApp extends IOApp {
       }
     }
   }
-
-  def produce[K, V](topic: String, records: Seq[(K, V)])(producer: KafkaProducer[K, V]): IO[Nothing] = {
-    IO(send(producer)(topic, records)).foreverM
-  }
-
-  private def send[K, V](
-      producer: KafkaProducer[K, V]
-  )(topic: String, records: Seq[(K, V)]): Seq[IO[Unit]] = {
-    records.map { case (k, v) =>
-      val p = Promise[Unit]()
-      producer.send(
-        new ProducerRecord[K, V](topic, k, v),
-        new Callback {
-          override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
-            println("produced a record")
-            Option(exception).map(p.failure).getOrElse(p.success(()))
-          }
-        }
-      )
-      IO.fromFuture(IO(p.future)) *> IO(println(s"produced data to [$topic]")) *> IO.sleep(2.seconds)
-    }
-  }
-
 }

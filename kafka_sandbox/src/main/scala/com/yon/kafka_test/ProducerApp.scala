@@ -47,6 +47,8 @@ object ProducerApp extends IOApp {
       producer: KafkaProducer[K, V]
   )(topic: String, records: Seq[(K, V)]): Seq[IO[Unit]] = {
     records.map { case (k, v) =>
+      Thread.sleep(1000)
+
       val p = Promise[Unit]()
       producer.send(
         new ProducerRecord[K, V](topic, k, v),
