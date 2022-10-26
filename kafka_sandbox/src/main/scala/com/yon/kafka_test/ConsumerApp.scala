@@ -2,7 +2,7 @@ package com.yon.kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.kafka_test.CarTrafficDummyData._
-import com.yon.kafka_test.KafkaClientConfig.kafkaProps
+import com.yon.kafka_test.KafkaClientConfig.consumerProps
 import com.yon.kafka_test.Serialization.deserializer
 import io.circe.generic.auto._
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
@@ -18,7 +18,7 @@ object ConsumerApp extends IOApp {
     Resource
       .make(IO {
         val consumer = new KafkaConsumer[CarId, CarSpeed](
-          kafkaProps(Some("json-topics-consumer"), "json-topics-consumer", "localhost:9092").asJava,
+          consumerProps(Some("json-topics-consumer"), "json-topics-consumer", "localhost:9092").asJava,
           deserializer[CarId],
           deserializer[CarSpeed]
         )

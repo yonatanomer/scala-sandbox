@@ -16,25 +16,21 @@ import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 import CarTrafficDummyData._
+import com.yon.kafka_test.KafkaClientConfig.consumerProps
 import com.yon.kafka_test.Serialization.{CirceJsonSerializer, deserializer, serializer}
 import io.circe.generic.auto._
+import KafkaClientConfig._
 
 object ProducerApp extends IOApp {
-  private val props: Map[String, Object] = Map(
-    CLIENT_ID_CONFIG -> "json-topics",
-    BOOTSTRAP_SERVERS_CONFIG -> "localhost:9092",
-    StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG -> Serdes.stringSerde.getClass
-    // in case if needed custom serializer, e.g for protobuf
-    //KEY_SERIALIZER_CLASS_CONFIG -> classOf[KafkaAvroSerializer],
-    //VALUE_SERIALIZER_CLASS_CONFIG -> classOf[KafkaAvroSerializer],
-    //SCHEMA_REGISTRY_URL_CONFIG -> "http://schema-registry:8081"
-  )
+  consumerProps(Some("json-topics"), "json-topics-consumer", "localhost:9092")
 
   override def run(args: List[String]): IO[ExitCode] = {
     Resource
-      .make(IO(new KafkaProducer[CarId, CarSpeed](props.asJava, serializer[CarId], serializer[CarSpeed])))(p => {
-        IO(p.close())
-      })
+      .make(IO(new KafkaProducer[CarId, CarSpeed](producerProps("json-topics").asJava, serializer[CarId], serializer[CarSpeed])))(
+        p => {
+          IO(p.close())
+        }
+      )
       .use(produce("car-speed", carSpeed))
       .as(ExitCode.Success)
   }
