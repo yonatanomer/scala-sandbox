@@ -1,11 +1,18 @@
-package com.yon.kafka_test
+package crawler.domain
+import crawler.domain.KafkaDemo.Domain._
+import io.circe.{Decoder, Encoder, Json}
+import io.circe.syntax._
 import io.circe.generic.auto._
+import io.circe.parser._
+import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 import org.apache.kafka.streams.kstream.GlobalKTable
-import org.apache.kafka.streams.scala.ImplicitConversions._
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream.{KStream, KTable}
+import org.apache.kafka.streams.scala.serialization.Serdes
+import org.apache.kafka.streams.scala.ImplicitConversions._
 
-class KafkaBasics {
+object KafkaDemo {
+
   object Topics {
     final val OrdersByUserTopic = "orders-by-user"
     final val DiscountProfilesByUserTopic = "discount-profiles-by-user"
@@ -14,8 +21,18 @@ class KafkaBasics {
     final val PaymentsTopic = "payments"
     final val PaidOrdersTopic = "paid-orders"
 
-    import Domain._
-    import Serialization._
+    implicit def serde[A >: Null: Decoder: Encoder]: Serde[A] = {
+      val serializer = (order: A) => order.asJson.noSpaces.getBytes
+      val deserializer = (data: Array[Byte]) => {
+        decode[A](new String(data)) match {
+          case Right(order) => Some(order)
+          case Left(err) =>
+            println(s"failed to parse message: $err")
+            Option.empty
+        }
+      }
+      Serdes.fromFn[A](serializer, deserializer)
+    }
 
     val builder = new StreamsBuilder()
     val userOrdersStream: KStream[UserId, Order] = builder.stream[UserId, Order](OrdersByUserTopic)
@@ -27,15 +44,15 @@ class KafkaBasics {
     val discountProfilesGTable: GlobalKTable[UserId, Discount] = builder.globalTable[UserId, Discount](DiscountsTopic)
 
     // KStream transformation
-    val expensiveOrders: KStream[UserId, Order] = userOrdersStream.filter { (userId, order) => order.amount > 1000 }
+    val expensiveOrders = userOrdersStream.filter { (userId, order) => order.amount > 1000 }
 
     val listsOfProducts: KStream[UserId, List[Product]] = userOrdersStream.mapValues(_.products)
     val streamOfProducts: KStream[UserId, Product] = userOrdersStream.flatMapValues(_.products)
 
     // Join with the profiles table, both are key'd by UserId
-//    val ordersWithUserProfiles: KStream[UserId, Order] = userOrdersStream.join(userProfilesTable)((order, profile) => {
-//      (order, profile)
-//    })
+    val ordersWithUserProfiles = userOrdersStream.join(userProfilesTable)((order, profile) => {
+      (order, profile)
+    })
 
     builder.build()
   }

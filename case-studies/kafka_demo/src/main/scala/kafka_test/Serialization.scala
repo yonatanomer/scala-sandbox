@@ -1,13 +1,10 @@
-package com.yon.kafka_test
+package kafka_test
 
-import com.yon.kafka_test.CarTrafficDummyData.CarId
-import com.yon.kafka_test.Serialization.CirceJsonDeserializer
+import io.circe.parser.decode
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 import org.apache.kafka.streams.scala.serialization.Serdes
-import io.circe.{Decoder, Encoder}
-import io.circe.parser.{decode, parse}
-import io.circe.syntax._
-import org.apache.kafka.common.errors.SerializationException
 
 /** Import this to implicitly create circe JSON serde for any case class
   */

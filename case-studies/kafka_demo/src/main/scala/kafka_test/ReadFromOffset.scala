@@ -1,18 +1,14 @@
-package com.yon.kafka_test
+package kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
-import com.yon.kafka_test.CarTrafficDummyData._
-import com.yon.kafka_test.KafkaClientConfig.consumerProps
-import com.yon.kafka_test.Serialization.deserializer
 import io.circe.generic.auto._
+import kafka_test.CarTrafficDummyData.{CarId, CarSpeed}
+import kafka_test.KafkaClientConfig.consumerProps
+import kafka_test.Serialization.deserializer
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
-import org.apache.kafka.clients.producer.ProducerConfig.{BOOTSTRAP_SERVERS_CONFIG, CLIENT_ID_CONFIG}
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.scala.serialization.Serdes
 
-import java.time.Duration
 import java.util
 import scala.collection.immutable.Seq
 import scala.concurrent.Promise

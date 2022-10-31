@@ -1,25 +1,16 @@
-package com.yon.kafka_test
+package kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import io.circe.generic.auto._
+import kafka_test.CarTrafficDummyData._
+import kafka_test.KafkaClientConfig._
+import kafka_test.Serialization.serializer
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
-import org.apache.kafka.clients.producer.ProducerConfig.{
-  BOOTSTRAP_SERVERS_CONFIG,
-  CLIENT_ID_CONFIG,
-  KEY_SERIALIZER_CLASS_CONFIG,
-  VALUE_SERIALIZER_CLASS_CONFIG
-}
-import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.scala.serialization.Serdes
 
 import scala.collection.immutable.Seq
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
-import CarTrafficDummyData._
-import com.yon.kafka_test.KafkaClientConfig.consumerProps
-import com.yon.kafka_test.Serialization.{CirceJsonSerializer, deserializer, serializer}
-import io.circe.generic.auto._
-import KafkaClientConfig._
 
 object ProducerApp extends IOApp {
   consumerProps(Some("json-topics"), "json-topics-consumer", "localhost:9092")

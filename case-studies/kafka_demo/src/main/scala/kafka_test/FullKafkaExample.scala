@@ -1,4 +1,4 @@
-package com.yon.kafka_test
+package kafka_test
 
 import io.circe.generic.auto._
 import org.apache.kafka.streams.kstream.{GlobalKTable, JoinWindows}

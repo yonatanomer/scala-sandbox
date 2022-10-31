@@ -11,16 +11,19 @@ val commonSettings = Seq(
   scalacOptions --= Seq("-Xfatal-warnings")
 )
 
-lazy val kafka_sandbox = (project in file("kafka_sandbox"))
+def caseStudy(proj: Project): Project = proj
+  .dependsOn(common % "test->test;compile->compile")
   .settings(commonSettings)
   .settings(
-    libraryDependencies ++= Dependencies.Kafka ++ Dependencies.Common
+    //scalacOptions += "-Ymacro-annotations", // required by cats-tagless-macros
+    libraryDependencies ++= Dependencies.Http ++ Dependencies.Common ++ Dependencies.Kafka
   )
 
-lazy val demo_projects = (project in file("case-studies") / "demo")
-  .dependsOn(kafka_sandbox % "test->test;compile->compile")
+lazy val crawler = caseStudy(project in file("case-studies") / "crawler")
+lazy val kafka_demo = caseStudy(project in file("case-studies") / "kafka_demo")
+
+lazy val common = (project in file("common"))
   .settings(commonSettings)
   .settings(
-    scalacOptions += "-Ymacro-annotations", // required by cats-tagless-macros
-    libraryDependencies ++= Dependencies.Http ++ Dependencies.Common
+    libraryDependencies ++= Dependencies.Common
   )

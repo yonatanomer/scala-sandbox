@@ -1,4 +1,4 @@
-package com.yon.kafka_test
+package kafka_test
 
 import scala.collection.immutable.Seq
 import scala.util.Random
