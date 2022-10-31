@@ -27,6 +27,11 @@ object Dependencies {
     "io.circe" %% "circe-parser" % circeVersion
   )
 
+  val Mongo: Seq[ModuleID] = Seq(
+    "org.mongodb.scala" %% "mongo-scala-driver" % "4.6.0",
+    "com.dimafeng" %% "testcontainers-scala-mongodb" % "0.40.10" % Test
+  )
+
   val Kafka: Seq[ModuleID] = Seq(
     "org.apache.kafka" % "kafka-clients" % kafkaVersion,
     "org.apache.kafka" % "kafka-streams" % kafkaVersion,
@@ -36,7 +41,10 @@ object Dependencies {
   val Testing: Seq[ModuleID] = Seq(
     "org.specs2" %% "specs2-junit" % "4.16.0",
     "org.scalatest" %% "scalatest" % "3.2.13",
-    "org.scalatest" %% "scalatest-flatspec" % "3.2.12"
+    "org.scalatest" %% "scalatest-flatspec" % "3.2.12",
+    "org.mock-server" % "mockserver-client-java" % "5.14.0",
+    "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.10",
+    "com.dimafeng" %% "testcontainers-scala-mockserver" % "0.40.10"
     //    Spec2 %% "specs2-core" % Versions.Spec2,
     //    Mockito % "mockito-core" % Versions.Mockito,
     //    Spec2 %% "specs2-mock" % Versions.Spec2,
