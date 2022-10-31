@@ -1,19 +1,14 @@
 package crawler.handlers
 
-import cats.Functor
+import cats.effect.IO
 import crawler.api.CrawlParams
 import crawler.api.Schema._
-import cats.effect.IO
+import crawler.{AppContext, ContextAccessor}
 import org.http4s.{Method, Request, Uri}
-import org.http4s.client.Client
 import sttp.model.StatusCode
 
-trait RequestHandler[IN, OUT] {
-  def crawl(client: Client[IO], params: IN): IO[Either[ErrorOut, OUT]]
-}
-
-object CrawlRequestHandler extends RequestHandler[CrawlParams, String] {
-  override def crawl(client: Client[IO], params: CrawlParams): IO[Either[(StatusCode, String), String]] = {
+object CrawlRequestHandler extends ContextAccessor {
+  def crawl(params: CrawlParams)(implicit appContext: AppContext): IO[Either[(StatusCode, String), String]] = {
     println(s"crawl handler received query :  $params")
 
     val req = Request[IO](
@@ -23,7 +18,7 @@ object CrawlRequestHandler extends RequestHandler[CrawlParams, String] {
       )
     )
 
-    client
+    httpClient
       .expect[String](req)
       .flatMap(resp => {
         if (resp.contains(params.pattern))

@@ -49,7 +49,7 @@ object Dependencies {
     //    Mockito % "mockito-core" % Versions.Mockito,
     //    Spec2 %% "specs2-mock" % Versions.Spec2,
     //    Tapir %% "tapir-sttp-stub-server" % Versions.Tapir
-  ).map(_ % "test")
+  ).map(_ % Test)
 
 //  val IntegrationTesting: Seq[ModuleID] = Seq(
 //    TestcontainersScala %% "testcontainers-scala-scalatest" % Versions.TestcontainersScala,

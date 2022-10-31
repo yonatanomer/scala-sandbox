@@ -1,19 +1,15 @@
 package crawler
 
-import crawler.api.Schema
-import crawler.api.Api
-
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import crawler.api.{Api, Schema}
+import crawler.handlers.CrawlRequestHandler
 import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.client.Client
 import org.http4s.server.{Router, Server}
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 import scala.io.StdIn
-
-case class AppContext(client: Client[IO])
 
 object Crawler extends IOApp {
 
@@ -35,6 +31,7 @@ object Crawler extends IOApp {
   }
 
   def startServer: Resource[IO, Server] = {
+
     for {
       client <- BlazeClientBuilder[IO].resource
       server <- BlazeServerBuilder[IO]
