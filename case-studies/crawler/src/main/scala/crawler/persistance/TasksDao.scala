@@ -14,10 +14,12 @@ trait TasksDao {
 object MongoTasksDao extends TasksDao {
 
   override def insertTask(params: CrawlParams): IO[Either[Exception, CrawlTask]] = {
-    throw new NotImplementedError()
+    IO(Left(new RuntimeException("insert task not implemented yet")))
+
+    //IO.raiseError(new RuntimeException("insertTask not implemented yet"))
   }
 
   override def getTask(id: Long): IO[Option[CrawlTask]] = {
-    throw new NotImplementedError()
+    IO.raiseError(new RuntimeException("getTask not implemented yet"))
   }
 }

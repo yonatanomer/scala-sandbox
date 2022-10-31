@@ -16,13 +16,9 @@ object CrawlRequestHandler extends ContextAccessor {
       .map { case Left(err) =>
         Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
       }
+      // note: this will catch only exceptions thrown by IO.raiseError, application errors should be caught in the statement above
       .handleError(err => {
-        Left(
-          new ErrorOut(
-            sttp.model.StatusCode.InternalServerError,
-            s"crawl handler failed due to internal server error: " + err.getClass
-          )
-        )
+        Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
       })
   }
 
