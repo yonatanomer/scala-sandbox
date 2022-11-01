@@ -4,6 +4,7 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import crawler.api.{Api, Schema}
 import crawler.handlers.CrawlRequestHandler
 import crawler.persistance.MongoTasksDao
+import crawler.producers.KafkaTaskProducer
 import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
@@ -37,7 +38,7 @@ object Crawler extends IOApp {
       client <- BlazeClientBuilder[IO].resource
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
-        .withHttpApp(Router("/" -> initRoutes(AppContext(client, MongoTasksDao))).orNotFound)
+        .withHttpApp(Router("/" -> initRoutes(AppContext(client, MongoTasksDao, KafkaTaskProducer))).orNotFound)
         .resource
     } yield server
 

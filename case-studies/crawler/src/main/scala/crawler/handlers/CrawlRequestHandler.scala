@@ -1,5 +1,6 @@
 package crawler.handlers
 
+import cats.data.EitherT
 import cats.effect.IO
 import crawler.api.CrawlParams
 import crawler.api.Schema._
@@ -9,17 +10,15 @@ import sttp.model.StatusCode
 object CrawlRequestHandler extends ContextAccessor {
 
   def crawl(params: CrawlParams)(implicit appContext: AppContext): IO[Either[(StatusCode, String), String]] = {
-    println(s"crawl handler received query :  $params")
+    val ret = for {
+      task <- tasksDao.insertTask(params)
+      res <- taskProducer.send(task)
+    } yield res
 
-    appContext.tasksDao
-      .insertTask(params)
-      .map { case Left(err) =>
-        Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
-      }
-      // note: this will catch only exceptions thrown by IO.raiseError, application errors should be caught in the statement above
-      .handleError(err => {
-        Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
-      })
+    ret.value.map {
+      case Right(_)  => Right("task submitted")
+      case Left(err) => Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
+    }
   }
 
   // todo move this to a task consumer
