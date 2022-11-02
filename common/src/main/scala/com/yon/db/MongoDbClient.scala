@@ -9,17 +9,20 @@ import org.mongodb.scala.{ConnectionString, MongoClient, MongoClientSettings}
 import scala.collection.immutable.Seq
 import scala.jdk.CollectionConverters._
 
-class MongoDbClient(uri: String, codecProviders: Seq[CodecProvider]) {
-  def resource: Resource[IO, MongoClient] = Resource.make(IO(initClient()))(client =>
-    IO {
-      // todo verify this
-      println("closing mongo")
-      client.close()
-    }
-  )
+case class MongoDbClient(client: MongoClient) {}
 
-  def initClient(): MongoClient = {
-    MongoClient(clientSettings(uri, codecRegistry(codecProviders)))
+object MongoDbClient {
+
+  def init(uri: String, codecs: Seq[CodecProvider]): Resource[IO, MongoDbClient] = {
+    Resource.make {
+      IO(new MongoDbClient(MongoClient(clientSettings(uri, codecRegistry(codecs)))))
+    } { client =>
+      IO {
+        println("closing mongo")
+        client.client.close()
+      }
+    }
+
   }
 
   private def codecRegistry(codexProviders: Seq[CodecProvider]): CodecRegistry = fromRegistries(
@@ -34,8 +37,4 @@ class MongoDbClient(uri: String, codecProviders: Seq[CodecProvider]) {
       .codecRegistry(codecRegistry)
       .build()
 
-}
-
-object MongoDbClient {
-  def apply[F[_]](uri: String, codecs: Seq[CodecProvider]): MongoDbClient = new MongoDbClient(uri, codecs)
 }
