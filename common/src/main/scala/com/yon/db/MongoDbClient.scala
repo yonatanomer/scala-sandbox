@@ -1,19 +1,24 @@
 package com.yon.db
+
+import cats.effect.{IO, Resource}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.{CodecProvider, CodecRegistry}
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
-import org.mongodb.scala.{ConnectionString, MongoClient, MongoClientSettings, MongoDatabase}
+import org.mongodb.scala.{ConnectionString, MongoClient, MongoClientSettings}
 
+import scala.collection.immutable.Seq
 import scala.jdk.CollectionConverters._
 
-object MongoDbClient {
+class MongoDbClient(uri: String, codecProviders: Seq[CodecProvider]) {
+  def resource: Resource[IO, MongoClient] = Resource.make(IO(initClient()))(client =>
+    IO {
+      // todo verify this
+      println("closing mongo")
+      client.close()
+    }
+  )
 
-  System.setProperty("org.mongodb.async.type", "netty")
-
-  def db(dbName: String, client: MongoClient): MongoDatabase = client.getDatabase(dbName)
-
-  def initClient(uri: String, codecProviders: Seq[CodecProvider]): MongoClient = {
-
+  def initClient(): MongoClient = {
     MongoClient(clientSettings(uri, codecRegistry(codecProviders)))
   }
 
@@ -29,4 +34,8 @@ object MongoDbClient {
       .codecRegistry(codecRegistry)
       .build()
 
+}
+
+object MongoDbClient {
+  def apply[F[_]](uri: String, codecs: Seq[CodecProvider]): MongoDbClient = new MongoDbClient(uri, codecs)
 }
