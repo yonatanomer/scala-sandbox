@@ -1,6 +1,7 @@
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import cats.conversions.all.autoWidenFunctor
+import cats.effect.IO
 import com.dimafeng.testcontainers.{ForAllTestContainer, MongoDBContainer}
 import com.yon.db.MongoDbClient
 import org.bson.codecs.configuration.CodecProvider
@@ -37,7 +38,7 @@ class MongoDbTest extends AsyncWordSpecLike with Matchers with ForAllTestContain
     db.getCollection[CrawlTask](tasksCollection).withDocumentClass()
 
   override def afterStart(): Unit = {
-    mongoClient = MongoDbClient.initClient(container.replicaSetUrl, codecs)
+    mongoClient = MongoDbClient[IO](container.replicaSetUrl, codecs).initClient()
 
     Await.ready(db.createCollection(tasksCollection).toFuture(), 10.seconds)
     val collections = Await.result(db.listCollectionNames().toFuture(), 10.seconds)

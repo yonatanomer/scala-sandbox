@@ -2,6 +2,7 @@ package crawler.handlers
 
 import cats.data.EitherT
 import cats.effect.IO
+import com.yon.db.MongoDbClient
 import crawler.api.CrawlParams
 import crawler.api.Schema._
 import crawler.{AppContext, ContextAccessor}
