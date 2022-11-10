@@ -15,14 +15,17 @@ object MongoDbClient {
 
   def init(uri: String, codecs: Seq[CodecProvider]): Resource[IO, MongoDbClient] = {
     Resource.make {
-      IO(new MongoDbClient(MongoClient(clientSettings(uri, codecRegistry(codecs)))))
+      IO(initClient(uri, codecs))
     } { client =>
       IO {
         println("closing mongo")
         client.client.close()
       }
     }
+  }
 
+  def initClient(uri: String, codecs: Seq[CodecProvider]) = {
+    new MongoDbClient(MongoClient(clientSettings(uri, codecRegistry(codecs))))
   }
 
   private def codecRegistry(codexProviders: Seq[CodecProvider]): CodecRegistry = fromRegistries(

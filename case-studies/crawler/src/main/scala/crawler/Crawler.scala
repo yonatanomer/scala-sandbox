@@ -37,9 +37,10 @@ object Crawler extends IOApp {
 
   def startServer: Resource[IO, Server] = {
 
+    // todo config
     for {
       client <- BlazeClientBuilder[IO].resource
-      mongo <- MongoDbClient.init("todo url", MongoTasksDao.codecs)
+      mongo <- MongoDbClient.init("mongodb://localhost:27017", MongoTasksDao.codecs)
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
         .withHttpApp(Router("/" -> initRoutes(AppContext(client, mongo, MongoTasksDao, KafkaTaskProducer))).orNotFound)

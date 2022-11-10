@@ -38,7 +38,7 @@ class MongoDbTest extends AsyncWordSpecLike with Matchers with ForAllTestContain
     db.getCollection[CrawlTask](tasksCollection).withDocumentClass()
 
   override def afterStart(): Unit = {
-    mongoClient = MongoDbClient[IO](container.replicaSetUrl, codecs).initClient()
+    mongoClient = MongoDbClient.initClient(container.replicaSetUrl, codecs).client
 
     Await.ready(db.createCollection(tasksCollection).toFuture(), 10.seconds)
     val collections = Await.result(db.listCollectionNames().toFuture(), 10.seconds)
