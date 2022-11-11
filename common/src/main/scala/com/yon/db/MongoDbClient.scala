@@ -24,8 +24,8 @@ object MongoDbClient {
     }
   }
 
-  def initClient(uri: String, codecs: Seq[CodecProvider]) = {
-    new MongoDbClient(MongoClient(clientSettings(uri, codecRegistry(codecs))))
+  def initClient(uri: String, codecs: Seq[CodecProvider]): MongoDbClient = {
+    new MongoDbClient(MongoClient(clientSettings(uri, codecs)))
   }
 
   private def codecRegistry(codexProviders: Seq[CodecProvider]): CodecRegistry = fromRegistries(
@@ -33,11 +33,11 @@ object MongoDbClient {
     DEFAULT_CODEC_REGISTRY
   )
 
-  private def clientSettings(uri: String, codecRegistry: CodecRegistry): MongoClientSettings =
+  def clientSettings(uri: String, codexProviders: Seq[CodecProvider]): MongoClientSettings =
     MongoClientSettings
       .builder()
       .applyConnectionString(new ConnectionString(uri))
-      .codecRegistry(codecRegistry)
+      .codecRegistry(codecRegistry(codexProviders))
       .build()
 
 }

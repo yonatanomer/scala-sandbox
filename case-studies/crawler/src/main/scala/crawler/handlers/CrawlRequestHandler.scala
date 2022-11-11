@@ -5,6 +5,7 @@ import cats.effect.IO
 import com.yon.db.MongoDbClient
 import crawler.api.CrawlParams
 import crawler.api.Schema._
+import crawler.utils.ErrorUtils
 import crawler.{AppContext, ContextAccessor}
 import sttp.model.StatusCode
 
@@ -18,7 +19,7 @@ object CrawlRequestHandler extends ContextAccessor {
 
     ret.value.map {
       case Right(_)  => Right("task submitted")
-      case Left(err) => Left(new ErrorOut(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"))
+      case Left(err) => ErrorUtils.errorResponse(sttp.model.StatusCode.InternalServerError, s"could not save task: $err")
     }
   }
 

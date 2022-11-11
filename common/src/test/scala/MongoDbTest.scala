@@ -1,26 +1,16 @@
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
-import cats.conversions.all.autoWidenFunctor
-import cats.effect.IO
 import com.dimafeng.testcontainers.{ForAllTestContainer, MongoDBContainer}
 import com.yon.db.MongoDbClient
 import org.bson.codecs.configuration.CodecProvider
-import org.bson.conversions.Bson
-import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Field
+import org.mongodb.scala.bson.codecs.Macros._
+import org.mongodb.scala.model.Filters
+import org.mongodb.scala.result.InsertOneResult
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoDatabase}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpecLike
 
-import java.util.{Observable, Observer}
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.DurationInt
-import org.mongodb.scala.model.Filters
-import org.mongodb.scala.result.InsertOneResult
-import org.bson.codecs.configuration.CodecProvider
-import org.mongodb.scala.bson.codecs.Macros._
-
 import scala.collection.immutable.Seq
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 class MongoDbTest extends AsyncWordSpecLike with Matchers with ForAllTestContainer {
 
