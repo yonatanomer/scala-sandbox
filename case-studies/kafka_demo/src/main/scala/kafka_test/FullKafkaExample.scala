@@ -15,7 +15,7 @@ import java.util.Properties
 
 object FullKafkaExample {
 
-  import Serialization._
+  import com.yon.kafka.Serialization._
 
   // Topics
   final val OrdersByUserTopic = "orders-by-user"

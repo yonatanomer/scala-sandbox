@@ -3,8 +3,8 @@ package kafka_test
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import io.circe.generic.auto._
 import kafka_test.CarTrafficDummyData.{CarId, CarSpeed}
-import kafka_test.KafkaClientConfig.consumerProps
-import kafka_test.Serialization.deserializer
+import com.yon.kafka.KafkaClientConfig.consumerProps
+import com.yon.kafka.Serialization.deserializer
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
 
 import java.time.Duration

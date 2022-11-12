@@ -1,4 +1,4 @@
-package kafka_test
+package com.yon.kafka
 
 import org.apache.kafka.clients.producer.ProducerConfig.{BOOTSTRAP_SERVERS_CONFIG, CLIENT_ID_CONFIG}
 import org.apache.kafka.streams.StreamsConfig

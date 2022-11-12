@@ -16,7 +16,7 @@ class KafkaBasics {
     final val PaidOrdersTopic = "paid-orders"
 
     import Domain._
-    import Serialization._
+    import com.yon.kafka.Serialization._
 
     val builder = new StreamsBuilder()
     val userOrdersStream: KStream[UserId, Order] = builder.stream[UserId, Order](OrdersByUserTopic)

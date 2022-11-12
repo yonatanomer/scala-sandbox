@@ -1,10 +1,11 @@
 package kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import com.yon.kafka.KafkaClientConfig._
+import com.yon.kafka.Serialization.serializer
+import io.circe.Encoder
 import io.circe.generic.auto._
 import kafka_test.CarTrafficDummyData._
-import kafka_test.KafkaClientConfig._
-import kafka_test.Serialization.serializer
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
 import scala.collection.immutable.Seq
@@ -16,14 +17,20 @@ object ProducerApp extends IOApp {
   consumerProps(Some("json-topics"), "json-topics-consumer", "localhost:9092")
 
   override def run(args: List[String]): IO[ExitCode] = {
-    Resource
-      .make(IO(new KafkaProducer[CarId, CarSpeed](producerProps("json-topics").asJava, serializer[CarId], serializer[CarSpeed])))(
-        p => {
-          IO(p.close())
-        }
-      )
+
+    makeProducer[CarId, CarSpeed]("json-topics")
       .use(produce("car-speed", carSpeed))
       .as(ExitCode.Success)
+  }
+
+  private def makeProducer[K >: Null, V >: Null](clientId: String)(implicit
+      keyEncoder: Encoder[K],
+      valEncoder: Encoder[V]
+  ): Resource[IO, KafkaProducer[K, V]] = {
+    Resource
+      .make(IO(new KafkaProducer[K, V](producerProps(clientId).asJava, serializer[K], serializer[V])))(p => {
+        IO(p.close())
+      })
   }
 
   def produce[K, V](topic: String, records: Seq[(K, V)])(producer: KafkaProducer[K, V]): IO[Nothing] = {
