@@ -2,6 +2,7 @@ package crawler
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.db.MongoDbClient
+import com.yon.kafka.MessageProducer
 import crawler.api.{Api, Schema}
 import crawler.handlers.CrawlRequestHandler
 import crawler.persistance.{CrawlTask, MongoTasksDao}
@@ -15,6 +16,7 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 import scala.collection.immutable.Seq
 import scala.io.StdIn
+import io.circe.generic.auto._
 
 object Crawler extends IOApp {
 
@@ -41,6 +43,7 @@ object Crawler extends IOApp {
     for {
       client <- BlazeClientBuilder[IO].resource
       mongo <- MongoDbClient.init("mongodb://test:test@0.0.0.0:27017", MongoTasksDao.codecs)
+      tasksProducer <- MessageProducer[String, CrawlTask]("crawl-tasks")
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
         .withHttpApp(Router("/" -> initRoutes(AppContext(client, MongoTasksDao(mongo), KafkaTaskProducer))).orNotFound)
