@@ -9,7 +9,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import scala.jdk.CollectionConverters._
 
 object ProducerFactory {
-  private def makeProducer[K >: Null, V >: Null](clientId: String)(implicit
+  def producer[K >: Null, V >: Null](clientId: String)(implicit
       keyEncoder: Encoder[K],
       valEncoder: Encoder[V]
   ): Resource[IO, KafkaProducer[K, V]] = {
