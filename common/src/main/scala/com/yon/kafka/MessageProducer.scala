@@ -1,5 +1,6 @@
 package com.yon.kafka
 
+import cats.data.EitherT
 import cats.effect.{IO, Resource}
 import com.yon.kafka.KafkaClientConfig.producerProps
 import com.yon.kafka.Serialization.serializer
@@ -10,17 +11,36 @@ import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 
-class MessageProducer[K >: Null, V >: Null](kafkaProducer: KafkaProducer[K, V]) {
+class MessageProducer[K >: Null, V >: Null](topic: String, kafkaProducer: KafkaProducer[K, V]) {
 
-  def send(topic: String, key: K, value: V): IO[Unit] = {
-    val p = Promise[Unit]()
+  def send(key: K, value: V): EitherT[IO, Exception, Unit] = EitherT {
+    val p = Promise[Either[Exception, Unit]]()
     println(s"Sending message to topic $topic")
     kafkaProducer.send(
       new ProducerRecord[K, V](topic, key, value),
       new Callback {
         override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
-          println("message sent")
-          Option(exception).map(p.failure).getOrElse(p.success(()))
+          exception match {
+            case null => p.success(Right(()))
+            case e    => p.success(Left(e))
+          }
+        }
+      }
+    )
+    IO.fromFuture(IO(p.future))
+  }
+
+  def send2(key: K, value: V): IO[Either[Exception, Unit]] = {
+    val p = Promise[Either[Exception, Unit]]()
+    println(s"Sending message to topic $topic")
+    kafkaProducer.send(
+      new ProducerRecord[K, V](topic, key, value),
+      new Callback {
+        override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
+          exception match {
+            case null => p.success(Right(()))
+            case e    => p.success(Left(e))
+          }
         }
       }
     )
@@ -31,7 +51,7 @@ class MessageProducer[K >: Null, V >: Null](kafkaProducer: KafkaProducer[K, V]) 
 }
 
 object MessageProducer {
-  def apply[K >: Null, V >: Null](clientId: String)(implicit
+  def apply[K >: Null, V >: Null](clientId: String, topic: String)(implicit
       keyEncoder: Encoder[K],
       valEncoder: Encoder[V]
   ): Resource[IO, MessageProducer[K, V]] = {
@@ -41,7 +61,7 @@ object MessageProducer {
         serializer[K],
         serializer[V]
       )
-      new MessageProducer(kafkaProducer)
+      new MessageProducer(topic, kafkaProducer)
     })(_.close())
   }
 

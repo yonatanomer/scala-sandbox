@@ -9,6 +9,7 @@ object Dependencies {
   val kafkaVersion = "2.8.0"
   val circeVersion = "0.14.1"
   val kafkaSerializationV = "0.5.22"
+  val fs2Version = "2.5.0"
 
   val Http: Seq[ModuleID] = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % TapirVersion,
@@ -24,7 +25,10 @@ object Dependencies {
     "org.typelevel" %% "cats-effect" % "3.3.12",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion
+    "io.circe" %% "circe-parser" % circeVersion,
+    "co.fs2" %% "fs2-core" % fs2Version,
+    "co.fs2" %% "fs2-io" % fs2Version,
+    "co.fs2" %% "fs2-reactive-streams" % fs2Version
   )
 
   val Mongo: Seq[ModuleID] = Seq(

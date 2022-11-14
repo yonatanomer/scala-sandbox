@@ -4,19 +4,15 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.db.MongoDbClient
 import com.yon.kafka.MessageProducer
 import crawler.api.{Api, Schema}
-import crawler.handlers.CrawlRequestHandler
 import crawler.persistance.{CrawlTask, MongoTasksDao}
-import crawler.producers.KafkaTaskProducer
-import org.bson.codecs.configuration.CodecProvider
+import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 
-import scala.collection.immutable.Seq
 import scala.io.StdIn
-import io.circe.generic.auto._
 
 object Crawler extends IOApp {
 
@@ -39,14 +35,14 @@ object Crawler extends IOApp {
 
   def startServer: Resource[IO, Server] = {
 
-    // todo config
+    // TODO: move config props to config class, move messaging constants to messaging model
     for {
       client <- BlazeClientBuilder[IO].resource
       mongo <- MongoDbClient.init("mongodb://test:test@0.0.0.0:27017", MongoTasksDao.codecs)
-      tasksProducer <- MessageProducer[String, CrawlTask]("crawl-tasks")
+      tasksProducer <- MessageProducer[String, CrawlTask]("crawler", "submitted-crawl-tasks")
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
-        .withHttpApp(Router("/" -> initRoutes(AppContext(client, MongoTasksDao(mongo), KafkaTaskProducer))).orNotFound)
+        .withHttpApp(Router("/" -> initRoutes(AppContext(client, MongoTasksDao(mongo), tasksProducer))).orNotFound)
         .resource
     } yield server
 

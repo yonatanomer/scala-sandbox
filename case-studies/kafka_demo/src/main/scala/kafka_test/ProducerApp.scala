@@ -2,28 +2,30 @@ package kafka_test
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.yon.kafka.MessageProducer
+import fs2.Stream
 import io.circe.generic.auto._
 import kafka_test.CarTrafficDummyData._
 
-import scala.collection.immutable.Seq
 import scala.concurrent.duration.DurationInt
 
 object ProducerApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
-    MessageProducer[CarId, CarSpeed]("json-topics")
-      .use(x => produce("car-speed", carSpeed)(x))
+    MessageProducer[CarId, CarSpeed]("json-topics", "car-speed")
+      .use(produce)
       .as(ExitCode.Success)
   }
-// todo on fixed in terval
-  def produce(topic: String, records: Seq[(CarId, CarSpeed)])(producer: MessageProducer[CarId, CarSpeed]): IO[Nothing] = {
-    IO {
-      records.map { case (k, v) =>
-        producer
-          .send(topic, k, v) *> IO {
-          println(s"produced data to [$topic]")
-        }
-      }
-    }.foreverM
-  }
 
+  def produce(producer: MessageProducer[CarId, CarSpeed]) = {
+
+    Stream
+      .emits[IO, (CarId, CarSpeed)](carSpeed)
+      .evalMap { case (carId, speed) =>
+        producer.send2(carId, speed)
+      }
+      .metered(2.seconds)
+      .repeat
+      .compile
+      .drain
+    //.covary[IO]
+  }
 }

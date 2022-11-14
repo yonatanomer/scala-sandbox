@@ -14,7 +14,7 @@ object CrawlRequestHandler extends ContextAccessor {
   def crawl(params: CrawlParams)(implicit appContext: AppContext): IO[Either[(StatusCode, String), String]] = {
     val ret = for {
       task <- tasksDao.insertTask(params)
-      res <- taskProducer.send(task)
+      res <- taskProducer.send(task.id.toString, task)
     } yield res
 
     ret.value.map {
