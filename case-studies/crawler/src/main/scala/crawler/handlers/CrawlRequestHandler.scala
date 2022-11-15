@@ -2,9 +2,7 @@ package crawler.handlers
 
 import cats.data.EitherT
 import cats.effect.IO
-import com.yon.db.MongoDbClient
 import crawler.api.CrawlParams
-import crawler.api.Schema._
 import crawler.utils.ErrorUtils
 import crawler.{AppContext, ContextAccessor}
 import sttp.model.StatusCode
@@ -13,14 +11,14 @@ object CrawlRequestHandler extends ContextAccessor {
 
   def crawl(params: CrawlParams)(implicit appContext: AppContext): IO[Either[(StatusCode, String), String]] = {
     val ret = for {
-      task <- tasksDao.insertTask(params)
-      res <- taskProducer.send(task.id.toString, task)
+      task <- EitherT(tasksDao.insertTask(params))
+      res <- EitherT(taskProducer.send(task.id.toString, task))
     } yield res
 
-    ret.value.map {
-      case Right(_)  => Right("task submitted")
-      case Left(err) => ErrorUtils.errorResponse(sttp.model.StatusCode.InternalServerError, s"could not save task: $err")
-    }
+    ret.fold(
+      err => ErrorUtils.errorResponse(sttp.model.StatusCode.InternalServerError, s"could not save task: $err"),
+      _ => Right("task submitted")
+    )
   }
 
   // todo move this to a task consumer

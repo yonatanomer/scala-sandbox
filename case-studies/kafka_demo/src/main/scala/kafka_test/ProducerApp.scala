@@ -15,12 +15,11 @@ object ProducerApp extends IOApp {
       .as(ExitCode.Success)
   }
 
-  def produce(producer: MessageProducer[CarId, CarSpeed]) = {
-
+  def produce(producer: MessageProducer[CarId, CarSpeed]): IO[Unit] = {
     Stream
       .emits[IO, (CarId, CarSpeed)](carSpeed)
       .evalMap { case (carId, speed) =>
-        producer.send2(carId, speed)
+        producer.send(carId, speed)
       }
       .metered(2.seconds)
       .repeat

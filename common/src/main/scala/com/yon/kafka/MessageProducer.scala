@@ -1,6 +1,5 @@
 package com.yon.kafka
 
-import cats.data.EitherT
 import cats.effect.{IO, Resource}
 import com.yon.kafka.KafkaClientConfig.producerProps
 import com.yon.kafka.Serialization.serializer
@@ -8,12 +7,11 @@ import io.circe.Encoder
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
 import scala.concurrent.Promise
-import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 
 class MessageProducer[K >: Null, V >: Null](topic: String, kafkaProducer: KafkaProducer[K, V]) {
 
-  def send(key: K, value: V): EitherT[IO, Exception, Unit] = EitherT {
+  def send(key: K, value: V): IO[Either[Exception, Unit]] = {
     val p = Promise[Either[Exception, Unit]]()
     println(s"Sending message to topic $topic")
     kafkaProducer.send(
@@ -21,25 +19,13 @@ class MessageProducer[K >: Null, V >: Null](topic: String, kafkaProducer: KafkaP
       new Callback {
         override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
           exception match {
-            case null => p.success(Right(()))
-            case e    => p.success(Left(e))
-          }
-        }
-      }
-    )
-    IO.fromFuture(IO(p.future))
-  }
-
-  def send2(key: K, value: V): IO[Either[Exception, Unit]] = {
-    val p = Promise[Either[Exception, Unit]]()
-    println(s"Sending message to topic $topic")
-    kafkaProducer.send(
-      new ProducerRecord[K, V](topic, key, value),
-      new Callback {
-        override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
-          exception match {
-            case null => p.success(Right(()))
-            case e    => p.success(Left(e))
+            case null => {
+              println(s"Message sent to topic $topic")
+              p.success(Right(()))
+            }
+            case e =>
+              println(s"Error sending message to topic $topic: $e")
+              p.success(Left(e))
           }
         }
       }

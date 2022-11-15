@@ -21,7 +21,6 @@ object Crawler extends IOApp {
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
-
     startServer
       .use { _ =>
         IO.blocking {
