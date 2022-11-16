@@ -2,14 +2,11 @@ import sbt._
 
 object Dependencies {
 
-  val CatsVersion = "3.3.12"
   val ConfigVersion = "4.6.1"
   val TapirVersion = "1.0.0"
   val http4sVersion = "0.23.12"
   val kafkaVersion = "2.8.0"
-  val circeVersion = "0.14.1"
   val kafkaSerializationV = "0.5.22"
-  val fs2Version = "2.5.0"
 
   val Http: Seq[ModuleID] = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % TapirVersion,
@@ -18,17 +15,6 @@ object Dependencies {
     "org.http4s" %% "http4s-dsl" % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
     "org.http4s" %% "http4s-blaze-client" % http4sVersion
-  )
-
-  val Common: Seq[ModuleID] = Seq(
-    "org.typelevel" %% "cats-core" % "2.5.0",
-    "org.typelevel" %% "cats-effect" % "3.3.12",
-    "io.circe" %% "circe-core" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion,
-    "co.fs2" %% "fs2-core" % fs2Version,
-    "co.fs2" %% "fs2-io" % fs2Version,
-    "co.fs2" %% "fs2-reactive-streams" % fs2Version
   )
 
   val Mongo: Seq[ModuleID] = Seq(
@@ -62,5 +48,21 @@ object Dependencies {
 //    Spec2 %% "specs2-core" % Versions.Spec2,
 //    ScalaTest %% "scalatest" % Versions.ScalaTest
 //  ).map(_ % "test, it")
+
+  // these are transitive dependencies of the above, but we might want to be explicit about them
+  val CatsVersion = "3.3.12"
+  val circeVersion = "0.14.1"
+  val fs2Version = "3.2.7"
+
+  val Common: Seq[ModuleID] = Seq(
+    //"org.typelevel" %% "cats-core" % "2.5.0",
+    //"org.typelevel" %% "cats-effect" % "3.3.12",
+    //"io.circe" %% "circe-core" % circeVersion,
+    //"io.circe" %% "circe-generic" % circeVersion,
+    //"io.circe" %% "circe-parser" % circeVersion,
+    //"co.fs2" %% "fs2-core" % fs2Version,
+    //"co.fs2" %% "fs2-io" % fs2Version,
+    //"co.fs2" %% "fs2-reactive-streams" % fs2Version
+  )
 
 }

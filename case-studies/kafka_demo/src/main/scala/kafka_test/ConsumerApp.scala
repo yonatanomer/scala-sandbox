@@ -3,33 +3,21 @@ package kafka_test
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import io.circe.generic.auto._
 import kafka_test.CarTrafficDummyData.{CarId, CarSpeed}
-import com.yon.kafka.KafkaClientConfig.consumerProps
-import com.yon.kafka.Serialization.deserializer
+import com.yon.kafka.MessageConsumer
+import cats.implicits._
+
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
 
 import java.time.Duration
 import scala.collection.immutable.Seq
-import scala.jdk.CollectionConverters._
 
 object ConsumerApp extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-
-    Resource
-      .make(IO {
-        val consumer = new KafkaConsumer[CarId, CarSpeed](
-          consumerProps(Some("json-topics-consumer"), "json-topics-consumer", "localhost:9092").asJava,
-          deserializer[CarId],
-          deserializer[CarSpeed]
-        )
-
-        consumer.subscribe(Seq("car-speed").asJava)
-        consumer
-      })(c => IO(c.close()))
+    MessageConsumer[CarId, CarSpeed]("car-consumer", "cars-consumer-group", "car-speed")
       .use { consumer =>
         val consume: IO[Unit] = for {
-
-          records <- IO(consumer.poll(Duration.ofSeconds(5)).asScala.toSeq)
+          records <- consumer.poll(Duration.ofSeconds(5))
           recs <- IO {
             println("consumed records:")
             records.map { r =>
@@ -39,20 +27,11 @@ object ConsumerApp extends IOApp {
             }
             records
           }
-          //_ <- keyValue.traverse { case (k, v) => IO(println(s"[$topic] $k => $v")) }
+          //.traverse { case (k, v) => IO(println(s"[$topic] $k => $v")) }
         } yield ()
         consume.foreverM
 
       }
       .as(ExitCode.Success)
-  }
-
-  def printRecords(records: Seq[ConsumerRecord[CarId, CarSpeed]]) = {
-    println("consumed records:")
-    records.map { r =>
-      {
-        println("record: " + r)
-      }
-    }
   }
 }
