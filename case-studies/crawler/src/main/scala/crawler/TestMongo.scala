@@ -39,7 +39,7 @@ import scala.concurrent.duration.DurationInt
 object TestMongo extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
     MongoDbClient
-      .init("mongodb://localhost:27017", MongoTasksDao.codecs)
+      .make("mongodb://localhost:27017", MongoTasksDao.codecs)
       .use { mongo =>
         IO.fromFuture(IO(mongo.client.listDatabaseNames().toFuture()))
           .flatMap { dbs =>

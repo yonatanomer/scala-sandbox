@@ -13,7 +13,7 @@ import cats.implicits._
 
 class MockServer(mockServerClient: MockServerClient) {
 
-  // TODO params, body, raw text body, expectd content type
+  // TODO params, body, raw text body, expected content type
 
   def mockResponse(
       method: String,

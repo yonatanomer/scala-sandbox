@@ -55,6 +55,7 @@ object Dependencies {
   val fs2Version = "3.2.7"
 
   val Common: Seq[ModuleID] = Seq(
+    "com.typesafe" % "config" % "1.4.2"
     //"org.typelevel" %% "cats-core" % "2.5.0",
     //"org.typelevel" %% "cats-effect" % "3.3.12",
     //"io.circe" %% "circe-core" % circeVersion,

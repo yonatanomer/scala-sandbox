@@ -1,6 +1,7 @@
 package crawler
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import com.yon.ConfigWrapper
 import com.yon.db.MongoDbClient
 import com.yon.kafka.MessageProducer
 import crawler.api.{Api, Schema}
@@ -36,8 +37,9 @@ object Crawler extends IOApp {
 
     // TODO: move config props to config class, move messaging constants to messaging model
     for {
+      conf <- ConfigWrapper.make("crawler.conf")
       client <- BlazeClientBuilder[IO].resource
-      mongo <- MongoDbClient.init("mongodb://test:test@0.0.0.0:27017", MongoTasksDao.codecs)
+      mongo <- MongoDbClient.make(conf, MongoTasksDao.codecs)
       tasksProducer <- MessageProducer[String, CrawlTask]("crawler", "submitted-crawl-tasks")
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
