@@ -1,7 +1,7 @@
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import com.dimafeng.testcontainers.{ForAllTestContainer, MockServerContainer}
-import crawler.Crawler
+import crawler.CrawlerCakePattern
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.scalatest
 import org.scalatest.flatspec.AnyFlatSpec
@@ -25,7 +25,7 @@ class CrawlerHandlerTest extends AnyFlatSpec with ForAllTestContainer with Match
 
     val res: Resource[IO, scalatest.Assertion] =
       for {
-        _ <- Crawler.startServer
+        _ <- CrawlerCakePattern.startServer
         client <- BlazeClientBuilder[IO].resource
         response <- Resource.eval(MockServer.sendGetRequest(s"http://localhost:9999/crawl", client))
       } yield response shouldBe expected

@@ -34,7 +34,7 @@ object Schema {
       .errorOut(statusCode)
       .errorOut(stringBody)
 
-  def docs()(implicit appContext: AppContext): List[ServerEndpoint[Any, IO]] = {
+  def docs(): List[ServerEndpoint[Any, IO]] = {
     val endpoints: List[AnyEndpoint] = List(crawlEndpointSchema)
     SwaggerInterpreter().fromEndpoints(endpoints, "Crawler Service", "1.0")
   }
