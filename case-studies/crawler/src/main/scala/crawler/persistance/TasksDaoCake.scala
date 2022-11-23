@@ -10,7 +10,15 @@ import org.mongodb.scala.result.InsertOneResult
 import scala.collection.immutable.Seq
 import org.mongodb.scala.model.Filters.equal
 
-trait MongoTasksDaoCake extends TasksDao {
+case class CrawlTask(id: Long, url: String, pattern: String, depth: Option[Int])
+
+trait TasksDao {
+  def insertTask(params: CrawlParams): IO[Either[Exception, CrawlTask]]
+
+  def getTask(id: Long): IO[Option[CrawlTask]]
+}
+
+trait MongoTasksDao extends TasksDao {
 
   val mongo: MongoDbClient
   private val collection = mongo.client.getDatabase("test").getCollection[CrawlTask]("tasks")
@@ -33,6 +41,6 @@ trait MongoTasksDaoCake extends TasksDao {
   }
 }
 
-object MongoTasksDaoCake {
+object MongoTasksDao {
   val codecs: Seq[CodecProvider] = Seq(classOf[CrawlTask])
 }

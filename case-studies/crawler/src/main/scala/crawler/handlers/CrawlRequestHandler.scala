@@ -2,17 +2,20 @@ package crawler.handlers
 
 import cats.data.EitherT
 import cats.effect.IO
+import com.yon.kafka.{CakeMessageProducer, MessageProducer}
 import crawler.api.CrawlParams
+import crawler.persistance.{CrawlTask, MongoTasksDao}
 import crawler.utils.ErrorUtils
 import crawler.{AppContext, ContextAccessor}
 import sttp.model.StatusCode
 
-object CrawlRequestHandler extends ContextAccessor {
+trait CrawlRequestHandler {
+  this: MongoTasksDao with CakeMessageProducer[String, CrawlTask] =>
 
-  def crawl(params: CrawlParams)(implicit appContext: AppContext): IO[Either[(StatusCode, String), String]] = {
+  def crawl(params: CrawlParams): IO[Either[(StatusCode, String), String]] = {
     val ret = for {
-      task <- EitherT(tasksDao.insertTask(params))
-      res <- EitherT(taskProducer.send(task.id.toString, task))
+      task <- EitherT(insertTask(params))
+      res <- EitherT(send(task.id.toString, task))
     } yield res
 
     ret.fold(

@@ -2,7 +2,6 @@ package crawler.api
 
 import cats.effect.IO
 import crawler.AppContext
-import crawler.handlers.CrawlRequestHandler
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Uri}
 import sttp.tapir
