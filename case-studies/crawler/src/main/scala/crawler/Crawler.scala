@@ -13,31 +13,17 @@ import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
-import sttp.model.StatusCode
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 import scala.io.StdIn
 
-/** Application components registry
-  * (IoC using Cake Pattern)
-  */
-// todo: crawler.api.Routes should be another dependency, the only API we will expose is initRoutes
 class CrawlerApp(
-    val mongo: MongoDbClient,
-    val kafkaProducer: KafkaProducer[String, CrawlTask],
-    val tasksTopicName: String = "submitted-crawl-tasks"
-) {
-
-  // Hide all internal members
-  private lazy val impl = new CrawlRequestHandler with MongoTasksDao with CakeMessageProducer[String, CrawlTask] {
-    override val mongo: MongoDbClient = mongo
-    override val topic: String = tasksTopicName
-    override val kafkaProducer: KafkaProducer[String, CrawlTask] = kafkaProducer
-  }
-
-  // Expose only the API methods
-  def crawl(params: CrawlParams): IO[Either[(StatusCode, String), String]] = impl.crawl(params: CrawlParams)
-}
+    override val mongo: MongoDbClient,
+    override val kafkaProducer: KafkaProducer[String, CrawlTask],
+    override val topic: String = "submitted-crawl-tasks"
+) extends MongoTasksDao
+    with CrawlRequestHandler
+    with CakeMessageProducer[String, CrawlTask] {}
 
 object Crawler extends IOApp {
 
