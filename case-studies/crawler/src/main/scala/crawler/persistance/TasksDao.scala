@@ -2,15 +2,14 @@ package crawler.persistance
 
 import cats.effect.IO
 import com.yon.db.MongoDbClient
-import crawler.api.CrawlParams
+import crawler.api.domain.CrawlParams
+import crawler.persistance.domain.CrawlTask
 import org.bson.codecs.configuration.CodecProvider
 import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.result.InsertOneResult
 
 import scala.collection.immutable.Seq
 import org.mongodb.scala.model.Filters.equal
-
-case class CrawlTask(id: Long, url: String, pattern: String, depth: Option[Int])
 
 trait TasksDao {
   def insertTask(params: CrawlParams): IO[Either[Exception, CrawlTask]]

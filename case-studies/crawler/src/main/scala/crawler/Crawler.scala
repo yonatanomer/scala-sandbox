@@ -4,7 +4,8 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.ConfigWrapper
 import com.yon.db.MongoDbClient
 import com.yon.kafka.MessageProducer
-import crawler.persistance.{CrawlTask, MongoTasksDao}
+import crawler.persistance.MongoTasksDao
+import crawler.persistance.domain.CrawlTask
 import io.circe.generic.auto._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder

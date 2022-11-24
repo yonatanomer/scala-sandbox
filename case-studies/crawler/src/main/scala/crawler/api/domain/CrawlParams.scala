@@ -1,6 +1,4 @@
-package crawler.api
-
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+package crawler.api.domain
 
 case class CrawlParams(url: String, pattern: String, depth: Option[Int])
 

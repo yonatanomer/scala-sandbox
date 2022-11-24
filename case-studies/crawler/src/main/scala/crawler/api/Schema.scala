@@ -1,14 +1,12 @@
 package crawler.api
 
 import cats.effect.IO
-import crawler.AppContext
-import org.http4s.client.Client
-import org.http4s.{Method, Request, Uri}
+import crawler.api.domain.CrawlParams
 import sttp.tapir
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
-import sttp.tapir.{AnyEndpoint, EndpointInput, ValidationResult, Validator, endpoint, query, statusCode, stringBody}
+import sttp.tapir.{AnyEndpoint, EndpointInput, endpoint, query, statusCode, stringBody}
 
 object Schema {
 

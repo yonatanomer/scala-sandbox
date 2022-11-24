@@ -1,15 +1,16 @@
-package crawler.domain
-import crawler.domain.KafkaDemo.Domain._
-import io.circe.{Decoder, Encoder, Json}
-import io.circe.syntax._
+package kafka_test
+
 import io.circe.generic.auto._
 import io.circe.parser._
-import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
+import kafka_test.KafkaDemo.Domain._
+import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.kstream.GlobalKTable
+import org.apache.kafka.streams.scala.ImplicitConversions._
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream.{KStream, KTable}
 import org.apache.kafka.streams.scala.serialization.Serdes
-import org.apache.kafka.streams.scala.ImplicitConversions._
 
 object KafkaDemo {
 

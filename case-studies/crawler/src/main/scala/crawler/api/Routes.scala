@@ -2,6 +2,7 @@ package crawler.api
 
 import cats.effect.IO
 import crawler.api.Schema.{BasicServerEndpoint, ErrorOut, Output, crawlEndpointSchema}
+import crawler.api.domain.CrawlParams
 import crawler.handlers.CrawlRequestHandler
 import org.http4s.HttpRoutes
 import sttp.tapir.server.ServerEndpoint
@@ -19,5 +20,4 @@ trait Routes {
   def initRoutes: HttpRoutes[IO] = {
     Http4sServerInterpreter[IO]().toRoutes(endpoints ++ Schema.docs)
   }
-
 }

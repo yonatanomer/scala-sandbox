@@ -10,7 +10,7 @@ import scala.concurrent.duration.DurationInt
 
 object ProducerApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
-    MessageProducer[CarId, CarSpeed]("json-topics", "car-speed")
+    MessageProducer[CarId, CarSpeed]("car-speed")
       .use(produce)
       .as(ExitCode.Success)
   }
@@ -19,7 +19,7 @@ object ProducerApp extends IOApp {
     Stream
       .emits[IO, (CarId, CarSpeed)](carSpeed)
       .evalMap { case (carId, speed) =>
-        producer.send(carId, speed)
+        producer.send("json-topics", carId, speed)
       }
       .metered(2.seconds)
       .repeat

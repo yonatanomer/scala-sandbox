@@ -28,7 +28,6 @@ class CrawlerHandlerTest extends AnyFlatSpec with ForAllTestContainer with Match
         _ <- Crawler.startServer
         client <- BlazeClientBuilder[IO].resource
         response <- Resource.eval(MockServer.sendGetRequest(s"http://localhost:9999/crawl", client))
-        //_ <- Resource.eval(IO {println(s"Response: $response")})
       } yield response shouldBe expected
     }
 
