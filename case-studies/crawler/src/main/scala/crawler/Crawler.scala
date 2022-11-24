@@ -3,13 +3,9 @@ package crawler
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.yon.ConfigWrapper
 import com.yon.db.MongoDbClient
-import com.yon.kafka.{CakeMessageProducer, MessageProducer}
-import crawler.api.Routes
-import crawler.handlers.CrawlRequestHandler
+import com.yon.kafka.MessageProducer
 import crawler.persistance.{CrawlTask, MongoTasksDao}
 import io.circe.generic.auto._
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
@@ -26,7 +22,7 @@ object Crawler extends IOApp {
           StdIn.readLine()
         }
       }
-      .as(ExitCode.Success) // same as .map(_ => ExitCode.Success)
+      .as(ExitCode.Success)
   }
 
   def startServer: Resource[IO, Server] = {
@@ -39,7 +35,7 @@ object Crawler extends IOApp {
       tasksProducer <- MessageProducer.kafkaProducer[String, CrawlTask]("crawler")
       server <- BlazeServerBuilder[IO]
         .bindHttp(9999, "localhost")
-        .withHttpApp(Router("/" -> AppContext.init(mongo, tasksProducer)).orNotFound)
+        .withHttpApp(Router("/" -> AppContext.initRoutes(mongo, tasksProducer)).orNotFound)
         .resource
     } yield server
 

@@ -47,6 +47,7 @@ object MockServer {
     )
 
   def sendGetRequest(url: String, client: Client[IO]): IO[String] = {
+    println(s"MockServer: GET/ $url")
     val request =
       Request[IO](
         method = Method.GET,
@@ -57,11 +58,11 @@ object MockServer {
     client
       .expectOr[String](request)(err => err.as[String].map(new Throwable(_)))
       .map { response =>
-        println(s"response from $url: $response")
+        println(s"MockServer: response from $url: $response")
         response
       }
       .recover { case e =>
-        println(s"request to $url failed with $e")
+        println(s"MockServer: request to $url failed with $e")
         e.toString
       }
   }

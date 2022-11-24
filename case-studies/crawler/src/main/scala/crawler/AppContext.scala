@@ -20,8 +20,8 @@ class AppContext(
     with CakeMessageProducer[String, CrawlTask]
 
 object AppContext {
-  def init(mongo: MongoDbClient, kafkaProducer: KafkaProducer[String, CrawlTask]): HttpRoutes[IO] = {
+  def initRoutes(mongo: MongoDbClient, kafkaProducer: KafkaProducer[String, CrawlTask]): HttpRoutes[IO] = {
     val app = new AppContext(mongo, kafkaProducer)
-    app.initRoutes()
+    app.initRoutes
   }
 }
