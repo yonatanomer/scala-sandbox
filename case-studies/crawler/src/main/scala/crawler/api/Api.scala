@@ -1,16 +1,23 @@
 package crawler.api
 
 import cats.effect.IO
-import crawler.{AppContext, CrawlerApp}
 import crawler.api.Schema.{BasicServerEndpoint, ErrorOut, Output, crawlEndpointSchema}
+import crawler.handlers.CrawlRequestHandler
+import org.http4s.HttpRoutes
 import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.http4s.Http4sServerInterpreter
 
-object Api {
-  def crawlEndpoint(app: CrawlerApp): BasicServerEndpoint[CrawlParams, Output, ErrorOut] = {
-    crawlEndpointSchema.serverLogic(app.crawl(_))
+trait Routes {
+  this: CrawlRequestHandler =>
+  def crawlEndpoint: BasicServerEndpoint[CrawlParams, Output, ErrorOut] = {
+    crawlEndpointSchema.serverLogic(crawl(_))
   }
 
-  def endpoints(app: CrawlerApp): List[ServerEndpoint[Any, IO]] =
-    List(crawlEndpoint(app))
+  def endpoints: List[ServerEndpoint[Any, IO]] =
+    List(crawlEndpoint)
+
+  def initRoutes: HttpRoutes[IO] = {
+    Http4sServerInterpreter[IO]().toRoutes(endpoints ++ Schema.docs)
+  }
 
 }

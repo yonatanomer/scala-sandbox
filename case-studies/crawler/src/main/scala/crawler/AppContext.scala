@@ -1,14 +1,27 @@
 package crawler
 
 import cats.effect.IO
-import com.yon.kafka.MessageProducer
-import crawler.persistance.{CrawlTask, TasksDao}
-import org.http4s.client.Client
+import com.yon.db.MongoDbClient
+import com.yon.kafka.CakeMessageProducer
+import crawler.api.Routes
+import crawler.handlers.CrawlRequestHandler
+import crawler.persistance.{CrawlTask, MongoTasksDao}
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.http4s.HttpRoutes
 
-case class AppContext(client: Client[IO], tasksDao: TasksDao, taskProducer: MessageProducer[String, CrawlTask])
+/** IoC using cake pattern */
+class AppContext(
+    override val mongo: MongoDbClient,
+    override val kafkaProducer: KafkaProducer[String, CrawlTask],
+    override val topic: String = "submitted-crawl-tasks"
+) extends Routes
+    with MongoTasksDao
+    with CrawlRequestHandler
+    with CakeMessageProducer[String, CrawlTask]
 
-trait ContextAccessor {
-  def httpClient(implicit appContext: AppContext): Client[IO] = appContext.client
-  def tasksDao(implicit appContext: AppContext) = appContext.tasksDao
-  def taskProducer(implicit appContext: AppContext): MessageProducer[String, CrawlTask] = appContext.taskProducer
+object AppContext {
+  def init(mongo: MongoDbClient, kafkaProducer: KafkaProducer[String, CrawlTask]): HttpRoutes[IO] = {
+    val app = new AppContext(mongo, kafkaProducer)
+    app.initRoutes()
+  }
 }
