@@ -1,9 +1,9 @@
-package crawler.handlers
+package crawler.web_api.handlers
 
 import cats.data.EitherT
 import cats.effect.IO
 import com.yon.kafka.MessageProducer
-import crawler.api.domain.CrawlParams
+import crawler.web_api.domain.CrawlParams
 import crawler.persistance.MongoTasksDao
 import crawler.persistance.domain.CrawlTask
 import crawler.utils.ErrorUtils

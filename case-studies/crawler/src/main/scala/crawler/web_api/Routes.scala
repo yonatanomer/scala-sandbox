@@ -1,9 +1,9 @@
-package crawler.api
+package crawler.web_api
 
 import cats.effect.IO
-import crawler.api.Schema.{BasicServerEndpoint, ErrorOut, Output, crawlEndpointSchema}
-import crawler.api.domain.CrawlParams
-import crawler.handlers.CrawlRequestHandler
+import crawler.web_api.Schema.{BasicServerEndpoint, ErrorOut, Output, crawlEndpointSchema}
+import crawler.web_api.domain.CrawlParams
+import crawler.web_api.handlers.CrawlRequestHandler
 import org.http4s.HttpRoutes
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter

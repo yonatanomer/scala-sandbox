@@ -1,4 +1,4 @@
-package crawler.api.domain
+package crawler.web_api.domain
 
 case class CrawlParams(url: String, pattern: String, depth: Option[Int])
 

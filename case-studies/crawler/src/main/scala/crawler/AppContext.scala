@@ -3,8 +3,8 @@ package crawler
 import cats.effect.IO
 import com.yon.db.MongoDbClient
 import com.yon.kafka.MessageProducer
-import crawler.api.Routes
-import crawler.handlers.CrawlRequestHandler
+import crawler.web_api.Routes
+import crawler.web_api.handlers.CrawlRequestHandler
 import crawler.persistance.MongoTasksDao
 import crawler.persistance.domain.CrawlTask
 import org.apache.kafka.clients.producer.KafkaProducer

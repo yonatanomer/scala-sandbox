@@ -1,7 +1,7 @@
-package crawler.api
+package crawler.web_api
 
 import cats.effect.IO
-import crawler.api.domain.CrawlParams
+import crawler.web_api.domain.CrawlParams
 import sttp.tapir
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full

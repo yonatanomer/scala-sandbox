@@ -15,9 +15,8 @@ case class MongoDbClient(client: MongoClient) {}
 
 object MongoDbClient {
 
-  def make(config: ConfigWrapper, codecs: Seq[CodecProvider]): Resource[IO, MongoDbClient] = {
-    val conf = MongoConfig(config)
-    val uri = s"mongodb://${conf.user}:${conf.password}@0.0.0.0:${conf.port}"
+  def make(conf: MongoConfig, codecs: Seq[CodecProvider]): Resource[IO, MongoDbClient] = {
+    val uri = s"mongodb://${conf.user}:${conf.password}@${conf.host}:${conf.port}"
 
     make(uri, codecs)
   }

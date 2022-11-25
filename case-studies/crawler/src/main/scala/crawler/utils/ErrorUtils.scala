@@ -1,6 +1,6 @@
 package crawler.utils
 
-import crawler.api.Schema.ErrorOut
+import crawler.web_api.Schema.ErrorOut
 import sttp.model.StatusCode
 
 object ErrorUtils {

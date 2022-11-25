@@ -2,7 +2,7 @@ package crawler.persistance
 
 import cats.effect.IO
 import com.yon.db.MongoDbClient
-import crawler.api.domain.CrawlParams
+import crawler.web_api.domain.CrawlParams
 import crawler.persistance.domain.CrawlTask
 import org.bson.codecs.configuration.CodecProvider
 import org.mongodb.scala.bson.codecs.Macros._
@@ -19,7 +19,7 @@ trait TasksDao {
 
 trait MongoTasksDao extends TasksDao {
 
-  val mongo: MongoDbClient
+  def mongo: MongoDbClient
   private val collection = mongo.client.getDatabase("test").getCollection[CrawlTask]("tasks")
 
   override def insertTask(params: CrawlParams): IO[Either[Exception, CrawlTask]] = {
