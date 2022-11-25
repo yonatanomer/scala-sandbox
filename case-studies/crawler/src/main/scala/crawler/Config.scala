@@ -22,7 +22,9 @@ object Config {
   // Configure camelCase parsing
   implicit def productHint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-  def make: Resource.Pure[IO, Config] = Resource.Pure {
-    ConfigSource.default.loadOrThrow[Config]
+  def resource: Resource.Pure[IO, Config] = Resource.Pure {
+    load
   }
+
+  def load: Config = ConfigSource.default.loadOrThrow[Config]
 }

@@ -31,7 +31,7 @@ object Crawler extends IOApp {
 
   def startServer: Resource[IO, server.Server] = {
     for {
-      conf <- Config.make
+      conf <- Config.resource
       client <- BlazeClientBuilder[IO].resource
       mongo <- MongoDbClient.make(conf.mongo, MongoTasksDao.codecs)
       tasksProducer <- MessageProducer.kafkaProducer[String, CrawlTask](conf.kafka.clientId)
