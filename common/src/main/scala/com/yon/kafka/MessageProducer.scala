@@ -55,7 +55,7 @@ object MessageProducer {
     })(_.close())
   }
 
-  def kafkaProducer[K >: Null, V >: Null]()(clientId: String)(implicit
+  def kafkaProducer[K >: Null, V >: Null](clientId: String)(implicit
       keyEncoder: Encoder[K],
       valEncoder: Encoder[V]
   ): Resource[IO, KafkaProducer[K, V]] = {
